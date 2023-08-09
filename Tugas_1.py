@@ -166,7 +166,7 @@ def display_filtered_data(df):
         st.write("Summary:")
         st.dataframe(summary_df)
                 
-        doc = Document("templates/Bismillah.docx")
+        doc = Document("templates/Template.docx")
 
         for table in doc.tables:
             for row in table.rows:
