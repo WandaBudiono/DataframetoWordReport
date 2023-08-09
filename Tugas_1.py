@@ -194,7 +194,6 @@ def generate_word_document(template_path, summary_df):
     # Simpan dokumen Word
     output_path = 'summary_output.docx'
     doc.save(output_path)
-    doc.close()
 
     return output_path
 
