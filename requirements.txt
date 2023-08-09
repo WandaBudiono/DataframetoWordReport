@@ -2,4 +2,3 @@ pandas
 streamlit
 openpyxl
 python-docx
-io
