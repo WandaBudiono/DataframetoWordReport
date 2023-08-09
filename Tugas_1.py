@@ -2,6 +2,8 @@ import streamlit as st
 import openpyxl
 import pandas as pd
 from docx import Document
+from io import BytesIO
+
 
 # Fungsi untuk menghitung kolom nilai dan keterangan
 def calculate_rating(row):
@@ -96,6 +98,7 @@ def read_all_sheets_in_excel(file_path):
 
 # Fungsi untuk menampilkan DataFrame yang telah difilter berdasarkan vendor, rentang bulan, dan tahun
 def display_filtered_data(df):
+    global filtered_data, summary_df, doc
     # Tampilkan widget untuk memilih vendor
     selected_vendors = st.multiselect('Select Vendor:', df['Vendor_name'].unique())
 
@@ -114,11 +117,9 @@ def display_filtered_data(df):
 
     # Filter DataFrame berdasarkan bulan yang dipilih
     filtered_data = filtered_data[filtered_data['BULAN'].isin(selected_months)] if selected_months else filtered_data
-    
+
     # Tampilkan DataFrame yang sudah difilter
     st.dataframe(filtered_data)
-    
-    
     
     # Hitung sum dan average (mean) dari kolom yang dipilih
     if not filtered_data.empty:
@@ -127,12 +128,12 @@ def display_filtered_data(df):
 
 
         summary_df = pd.DataFrame({
-            'Sum of TOT.PO': [sum_selected_columns],
-            'Mean of RP/PP': [mean_selected_columns['RP/PP']],
-            'Mean of KUALITAS': [mean_selected_columns['KUALITAS']],
-            'Mean of K3': [mean_selected_columns['K3']],
-            'Mean of L': [mean_selected_columns['L']],
-            'Mean of TOT POINT': [mean_selected_columns['TOT POINT']]
+            'Sum of TOT.PO': [int(sum_selected_columns)],
+            'Mean of RP/PP': [int(mean_selected_columns['RP/PP'])],
+            'Mean of KUALITAS': [int(mean_selected_columns['KUALITAS'])],
+            'Mean of K3': [int(mean_selected_columns['K3'])],
+            'Mean of L': [int(mean_selected_columns['L'])],
+            'Mean of TOT POINT': [int(mean_selected_columns['TOT POINT'])]
         })
         def assign_grade(score):
             if score <= 40:
@@ -164,40 +165,31 @@ def display_filtered_data(df):
 
         st.write("Summary:")
         st.dataframe(summary_df)
-        return filtered_data, summary_df
+                
+        doc = Document(r"D:\Users\Wanda Arofana\Documents\Programming\Pengumpulan Soal-20230605T152648Z-001\tugas 1\Template.docx")
 
-# Fungsi untuk membuat dokumen Word berdasarkan template dan DataFrame
-def generate_word_document(template_path, summary_df):
-    # Baca template dokumen Word
-    doc = Document(template_path)
-
-    # Ganti placeholder dengan nilai dari DataFrame
-    for table in doc.tables:
-        for row in table.rows:
-            for cell in row.cells:
-                for paragraph in cell.paragraphs:
-                    if '{Mean of RP/PP}' in paragraph.text:
-                        paragraph.text = paragraph.text.replace('{Mean of RP/PP}', str(summary_df['Mean of RP/PP'][0]))
-                    if '{Mean of KUALITAS}' in paragraph.text:
-                        paragraph.text = paragraph.text.replace('{Mean of KUALITAS}', str(summary_df['Mean of KUALITAS'][0]))
-                    if '{Mean of K3}' in paragraph.text:
-                        paragraph.text = paragraph.text.replace('{Mean of K3}', str(summary_df['Mean of K3'][0]))
-                    if '{Mean of L}' in paragraph.text:
-                        paragraph.text = paragraph.text.replace('{Mean of L}', str(summary_df['Mean of L'][0]))
-                    if '{Mean of TOT POINT}' in paragraph.text:
-                        paragraph.text = paragraph.text.replace('{Mean of TOT POINT}', str(summary_df['Mean of TOT POINT'][0]))
-                    if '{Vendor_name}' in paragraph.text:
-                        paragraph.text = paragraph.text.replace('{Vendor_name}', str(filtered_data['Vendor_name'].iloc[0]))
-                    if '{Keterangan}' in paragraph.text:
-                        paragraph.text = paragraph.text.replace('{Keterangan}', str(summary_df['Keterangan'][0]))
-
-    # Simpan dokumen Word
-    output_path = 'summary_output.docx'
-    doc.save(output_path)
-
-    return output_path
-
-
+        for table in doc.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    # Ganti teks di dalam sel tabel
+                    if "(Vendor_name)" in cell.text:
+                        cell.text = cell.text.replace("(Vendor_name)", filtered_data['Vendor_name'].iloc[0])
+                    elif '(PP)' in cell.text:
+                        cell.text = cell.text.replace('(PP)', str(int(summary_df['Mean of RP/PP'].iloc[0])))
+                    elif '(K)' in cell.text:
+                        cell.text = cell.text.replace('(K)', str(int(summary_df['Mean of KUALITAS'].iloc[0])))
+                    elif '(K3)' in cell.text:
+                        cell.text = cell.text.replace('(K3)', str(int(summary_df['Mean of K3'].iloc[0])))
+                    elif '(L)' in cell.text:
+                        cell.text = cell.text.replace('(L)', str(int(summary_df['Mean of L'].iloc[0])))
+        
+        for paragraph in doc.paragraphs:
+            if "{Keterangan}" in paragraph.text:
+                paragraph.text = paragraph.text.replace("{Keterangan}", summary_df['Keterangan'].iloc[0])
+            if "(TOT)" in paragraph.text:
+                paragraph.text = paragraph.text.replace("(TOT)", str(int(summary_df['Mean of TOT POINT'].iloc[0])))
+        
+        
 # Load data from the uploaded file
 uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx", "xls"])
 
@@ -206,9 +198,12 @@ if uploaded_file is not None:
     result_df = read_all_sheets_in_excel(uploaded_file)
 
     # Display filtered data based on user selection
-    filtered_data, summary_df  = display_filtered_data(result_df)
-    
-    # Generate and download Word document
-    template_path = "templates/Bismillah.docx"  # Path to your Word template
-    word_output_path = generate_word_document(template_path, summary_df)
-    st.download_button(label="Download Word Document", data=word_output_path, file_name="Bismillah.docx")
+    display_filtered_data(result_df)
+
+    if st.button("Download Word Document"):
+        if doc is not None:
+            byte_io = BytesIO()
+            doc.save(byte_io)
+            byte_io.seek(0)
+            st.download_button(label="Download Here", data=byte_io, file_name="Result.docx")
+
