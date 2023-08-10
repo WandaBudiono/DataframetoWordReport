@@ -171,6 +171,7 @@ def display_filtered_data(df):
         selected_date = st.date_input('Input Tanggal')
         tahun_fiskal = st.text_input('Input Tahun Fiskal')
         periode = st.text_input('Input Periode Tahun')
+        lampiran = st.text_input('Input Lampiran')
                 
         doc = Document("templates/Template.docx")
 
@@ -209,6 +210,8 @@ def display_filtered_data(df):
                         cell.text = cell.text.replace("(tanggal)", formatted_date)
                     elif "(nomor)" in cell.text :
                         cell.text = cell.text.replace("(nomor)", input_data)
+                    elif "(lampiran)" in cell.text :
+                        cell.text = cell.text.replace("(lampiran)", lampiran)  
         
         for paragraph in doc.paragraphs:
             if "{Keterangan}" in paragraph.text:
@@ -219,6 +222,11 @@ def display_filtered_data(df):
                 paragraph.text = paragraph.text.replace("(fiskal)", tahun_fiskal)
             if "(periode)" in paragraph.text:
                 paragraph.text = paragraph.text.replace("(periode)", periode)
+            if "(bintang)" in paragraph.text :
+                if total < 100 :
+                    paragraph.text = paragraph.text.replace('(bintang)', "(*) Item penilaian yang belum memenuhi target mohon dapat ditingkatkan.")
+                else : 
+                    paragraph.text = paragraph.text.replace('(bintang)', "")
         
 # Load data from the uploaded file
 uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx", "xls"])
