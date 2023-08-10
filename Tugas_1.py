@@ -218,6 +218,7 @@ def display_filtered_data(df):
                 paragraph.text = paragraph.text.replace("{Keterangan}", summary_df['Keterangan'].iloc[0])
             if "(TOT)" in paragraph.text:
                 paragraph.text = paragraph.text.replace("(TOT)", str(int(summary_df['Mean of TOT POINT'].iloc[0])))
+                total = int(summary_df['Mean of TOT POINT'].iloc[0])
             if "(fiskal)" in paragraph.text:
                 paragraph.text = paragraph.text.replace("(fiskal)", tahun_fiskal)
             if "(periode)" in paragraph.text:
