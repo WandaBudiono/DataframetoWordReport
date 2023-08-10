@@ -181,13 +181,29 @@ def display_filtered_data(df):
                     if "(Vendor_name)" in cell.text:
                         cell.text = cell.text.replace("(Vendor_name)", filtered_data['Vendor_name'].iloc[0])
                     elif '(PP)' in cell.text:
-                        cell.text = cell.text.replace('(PP)', str(int(summary_df['Mean of RP/PP'].iloc[0])))
+                        pp_value = int(summary_df['Mean of RP/PP'].iloc[0])
+                        if pp_value < 25:
+                            cell.text = cell.text.replace('(PP)', f'{pp_value}*')
+                        else:
+                            cell.text = cell.text.replace('(PP)', str(pp_value))
                     elif '(K)' in cell.text:
-                        cell.text = cell.text.replace('(K)', str(int(summary_df['Mean of KUALITAS'].iloc[0])))
+                        k_value = int(summary_df['Mean of KUALITAS'].iloc[0])
+                        if k_value < 15 :
+                            cell.text = cell.text.replace('(K)', f'{k_value}*')
+                        else:
+                            cell.text = cell.text.replace('(K)', str(k_value))
                     elif '(K3)' in cell.text:
-                        cell.text = cell.text.replace('(K3)', str(int(summary_df['Mean of K3'].iloc[0])))
+                        k3_value = int(summary_df['Mean of K3'].iloc[0])
+                        if k3_value < 40 :
+                            cell.text = cell.text.replace('(K3)', f'{k3_value}*')
+                        else:
+                            cell.text = cell.text.replace('(K3)', str(k3_value))                        
                     elif '(L)' in cell.text:
-                        cell.text = cell.text.replace('(L)', str(int(summary_df['Mean of L'].iloc[0])))
+                        L_value = int(summary_df['Mean of L'].iloc[0])
+                        if L_value < 20 :
+                            cell.text = cell.text.replace('(L)', f'{L_value}*')
+                        else:
+                            cell.text = cell.text.replace('(L)', str(L_value))                        
                     elif "(tanggal)" in cell.text :
                         formatted_date = selected_date.strftime("%d %B %Y")
                         cell.text = cell.text.replace("(tanggal)", formatted_date)
