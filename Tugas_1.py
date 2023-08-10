@@ -166,6 +166,11 @@ def display_filtered_data(df):
 
         st.write("Summary:")
         st.dataframe(summary_df)
+
+        input_data = st.text_input('Input Nomor Surat')
+        selected_date = st.date_input('Input Tanggal')
+        tahun_fiskal = st.text_input('Input Tahun Fiskal')
+        periode = st.text_input('Input Periode Tahun')
                 
         doc = Document("templates/Template.docx")
 
@@ -183,13 +188,21 @@ def display_filtered_data(df):
                         cell.text = cell.text.replace('(K3)', str(int(summary_df['Mean of K3'].iloc[0])))
                     elif '(L)' in cell.text:
                         cell.text = cell.text.replace('(L)', str(int(summary_df['Mean of L'].iloc[0])))
+                    elif "(tanggal)" in cell.text :
+                        formatted_date = selected_date.strftime("%d %B %Y")
+                        cell.text = cell.text.replace("(tanggal)", formatted_date)
+                    elif "(nomor)" in cell.text :
+                        cell.text = cell.text.replace("(nomor)", input_data)
         
         for paragraph in doc.paragraphs:
             if "{Keterangan}" in paragraph.text:
                 paragraph.text = paragraph.text.replace("{Keterangan}", summary_df['Keterangan'].iloc[0])
             if "(TOT)" in paragraph.text:
                 paragraph.text = paragraph.text.replace("(TOT)", str(int(summary_df['Mean of TOT POINT'].iloc[0])))
-        
+            if "(fiskal)" in paragraph.text:
+                paragraph.text = paragraph.text.replace("(fiskal)", tahun_fiskal)
+            if "(periode)" in paragraph.text:
+                paragraph.text = paragraph.text.replace("(periode)", periode)
         
 # Load data from the uploaded file
 uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx", "xls"])
