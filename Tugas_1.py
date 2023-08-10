@@ -4,6 +4,7 @@ import pandas as pd
 from docx import Document
 from io import BytesIO
 
+st.title ("Dashboard Evaluasi Vendor")
 
 # Fungsi untuk menghitung kolom nilai dan keterangan
 def calculate_rating(row):
