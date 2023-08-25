@@ -246,3 +246,9 @@ if uploaded_file is not None:
             byte_io.seek(0)
             st.download_button(label="Download Here", data=byte_io, file_name="Result.docx")
 
+st.write(
+    '<div style="position: fixed; bottom: 10px; right: 10px;">'
+    '© 2023 Irwanda B. Matematika ITS.'
+    '</div>',
+    unsafe_allow_html=True
+)
