@@ -175,7 +175,7 @@ def display_filtered_data(df):
         periode = st.text_input('Input Periode Tahun')
         lampiran = st.text_input('Input Lampiran')
                 
-        doc = Document(r"D:\Users\Wanda Arofana\Documents\Programming\KP Ajinomoto\tugas 1\templates\Template.docx")
+        doc = Document("templates/Template.docx")
 
         for table in doc.tables:
             for row in table.rows:
