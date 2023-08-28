@@ -1,5 +1,6 @@
 import streamlit as st
 import openpyxl
+import datetime
 import pandas as pd
 from docx import Document
 from io import BytesIO
@@ -166,14 +167,15 @@ def display_filtered_data(df):
 
         st.write("Summary:")
         st.dataframe(summary_df)
-
+        
+        input_deptmanager = st.text_input('Input Department Manager Name')
         input_data = st.text_input('Input Nomor Surat')
         selected_date = st.date_input('Input Tanggal')
         tahun_fiskal = st.text_input('Input Tahun Fiskal')
         periode = st.text_input('Input Periode Tahun')
         lampiran = st.text_input('Input Lampiran')
                 
-        doc = Document("templates/Template.docx")
+        doc = Document(r"D:\Users\Wanda Arofana\Documents\Programming\KP Ajinomoto\tugas 1\templates\Template.docx")
 
         for table in doc.tables:
             for row in table.rows:
@@ -204,14 +206,14 @@ def display_filtered_data(df):
                         if L_value < 20 :
                             cell.text = cell.text.replace('(L)', f'{L_value}*')
                         else:
-                            cell.text = cell.text.replace('(L)', str(L_value))                        
+                            cell.text = cell.text.replace('(L)', str(L_value))   
+                    elif "(lampiran)" in cell.text :
+                        cell.text = cell.text.replace("(lampiran)", lampiran)                     
                     elif "(tanggal)" in cell.text :
                         formatted_date = selected_date.strftime("%d %B %Y")
                         cell.text = cell.text.replace("(tanggal)", formatted_date)
                     elif "(nomor)" in cell.text :
                         cell.text = cell.text.replace("(nomor)", input_data)
-                    elif "(lampiran)" in cell.text :
-                        cell.text = cell.text.replace("(lampiran)", lampiran)  
         
         for paragraph in doc.paragraphs:
             if "{Keterangan}" in paragraph.text:
@@ -228,6 +230,9 @@ def display_filtered_data(df):
                     paragraph.text = paragraph.text.replace('(bintang)', "(*) Item penilaian yang belum memenuhi target mohon dapat ditingkatkan.")
                 else : 
                     paragraph.text = paragraph.text.replace('(bintang)', "")
+            if "(dept_manager)" in paragraph.text:
+                paragraph.text = paragraph.text.replace("(dept_manager)", input_deptmanager)
+        
         
 # Load data from the uploaded file
 uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx", "xls"])
@@ -245,10 +250,3 @@ if uploaded_file is not None:
             doc.save(byte_io)
             byte_io.seek(0)
             st.download_button(label="Download Here", data=byte_io, file_name="Result.docx")
-
-st.write(
-    '<div style="position: fixed; bottom: 10px; right: 10px;">'
-    '© 2023 Irwanda B. Matematika ITS.'
-    '</div>',
-    unsafe_allow_html=True
-)
